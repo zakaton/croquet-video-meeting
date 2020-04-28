@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <title>Croquet Video Chat</title>
+
+        <!-- https://docs.mapbox.com/mapbox-gl-js/ -->
+        <script src='https://api.mapbox.com/mapbox-gl-js/v1.9.0/mapbox-gl.js'></script>
+        <link href='https://api.mapbox.com/mapbox-gl-js/v1.9.0/mapbox-gl.css' rel='stylesheet' />
+
+        <!-- https://github.com/webtorrent/webtorrent/blob/master/docs/api.md -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/webtorrent/0.107.17/webtorrent.min.js"></script>
+
+        <!-- https://github.com/feross/simple-peer -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.6.2/simplepeer.min.js"></script>
+
+        <!-- https://resonance-audio.github.io/resonance-audio/develop/web/getting-started.html -->
+        <script src="https://cdn.jsdelivr.net/npm/resonance-audio/build/resonance-audio.min.js"></script>
+
+        <!-- https://croquet.studio/sdk/docs/index.html -->
+        <meta charset="utf-8">
+        <script src="https://croquet.io/sdk/croquet-latest.min.js"></script>
+
+        <script src="script/croquet/Session.js" type="module" defer></script>
+    </head>
+
+    <body>
+        <h1>Croquet Video Chat</h1>
+
+        <video playsinline autoplay muted id=video width=200></video>
+        <video playsinline autoplay muted id=screenVideo width=200></video>
+
+        <select id='videoInputs'></select>
+        <select id='audioInputs'></select>
+        
+        <button id='screenShare' disabled>Share Screen</button>
+
+        <button id='toggleAudio'>Mute</button>
+        <button id='toggleVideo'>Hide</button>
+
+        <hr>
+    </body>
+</html>
