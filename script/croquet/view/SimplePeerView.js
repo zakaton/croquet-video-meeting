@@ -54,32 +54,32 @@ class SimplePeerView extends Croquet.View {
 
         // https://github.com/feross/simple-peer#peeronconnect---
         peer.on('connect', () => {
-            console.log('connect');
-            this.publish('simple-peer', 'onconnect', {viewId});
+            console.log('connect', viewId);
+            this.publish('simple-peer', 'onconnect', {viewId, peer});
         });
 
         // https://github.com/feross/simple-peer#peeronstream-stream--
-        peer.on('stream', stream => {
+        peer.on('stream', stream => {            
             console.log('stream', stream);
-            this.publish('simple-peer', 'onstream', {viewId, stream});
+            this.publish('simple-peer', 'onstream', {viewId, peer, stream});
         });
 
         // https://github.com/feross/simple-peer#peerontrack-track-stream--
         peer.on('track', (track, stream) => {
-            this.publish('simple-peer', 'ontrack', {viewId, track, stream});
+            this.publish('simple-peer', 'ontrack', {viewId, peer, track, stream});
         });
 
         // https://github.com/feross/simple-peer#peeronclose---
         peer.on('close', () => {
-            console.log('close');
-            this.publish('simple-peer', 'onclose', {viewId});
+            console.log('close', viewId);
+            this.publish('simple-peer', 'onclose', {viewId, peer});
             delete this.peers[viewId];
         });
 
         // https://github.com/feross/simple-peer#peeronerror-err--
         peer.on('error', error => {
             //console.error(error);
-            this.publish('simple-peer', 'onerror', {viewId, error});
+            this.publish('simple-peer', 'onerror', {viewId, peer, error});
         });
 
         return peer;
@@ -87,7 +87,7 @@ class SimplePeerView extends Croquet.View {
 
     connect({viewId}) {
         if(this.viewId == viewId) return;
-        if(this.peers[viewId] && this.peers[viewId].connected) return
+        if(this.peers[viewId]) this.peers[viewId].destroy();
 
         this.createPeer(viewId, {
             initiator : true,
@@ -160,15 +160,15 @@ class SimplePeerView extends Croquet.View {
     onCameraStream(stream) {
         for(const viewId in this.peers) {
             const peer = this.peers[viewId];
-            if(peer.connected)
-                peer.addStream(stream);
+            peer.addStream(stream);
         }
         this.streams.camera = stream;
     }
     onCameraStreamStop(stream) {
         if(this.streams.camera == stream) {
             for(const viewId in this.peers) {
-                this.peers[viewId].removeStream(this.streams.camera);
+                const peer = this.peers[viewId];
+                peer.removeStream(stream);
             }
             delete this.streams.camera;
         }
@@ -185,7 +185,10 @@ class SimplePeerView extends Croquet.View {
     onScreenShareStreamStop(stream) {
         if(this.streams.screen == stream) {
             for(const viewId in this.peers) {
-                this.peers[viewId].removeStream(this.streams.screen);
+                const peer = this.peers[viewId];
+                if(peer.connected) {
+                    peer.removeStream(this.streams.screen);
+                }
             }
             delete this.streams.screen;
         }

@@ -4,10 +4,35 @@ class WebTorrentView extends Croquet.View {
 
         // https://github.com/webtorrent/webtorrent/blob/master/docs/api.md#client--new-webtorrentopts
         this._client = new WebTorrent();
+        // https://github.com/webtorrent/webtorrent/blob/master/docs/api.md#torrentremovepeerpeer
+        this._client.on('torrent', this.onTorrent.bind(this));
+        
         this._hashingClient = new WebTorrent();
 
         this.subscribe("torrent", "add", this.add);
         this.subscribe("torrent", "seed", this.seed);
+
+        this.peers = [];
+        this.subscribe('simple-peer', 'onconnect', this.onConnect);
+        this.subscribe('simple-peer', 'onclose', this.onClose);
+    }
+
+    onTorrent(torrent) {
+        // https://github.com/webtorrent/webtorrent/blob/master/docs/api.md#torrentaddpeerpeer
+        this.peers.forEach(peer => torrent.addPeer(peer));
+    }
+
+    onConnect({peer}) {
+        this.peers.push(peer);
+
+        // https://github.com/webtorrent/webtorrent/blob/master/docs/api.md#torrentaddpeerpeer
+        this._client.torrents.forEach(torrent => torrent.addPeer(peer));
+    }
+    onClose({peer}) {
+        this.peers.splice(this.peers.indexOf(peer), 1);
+
+        // https://github.com/webtorrent/webtorrent/blob/master/docs/api.md#torrentremovepeerpeer
+        this._client.torrents.forEach(torrent => torrent.removePeer(peer));
     }
 
     getMagnetURI(files, callback) {
@@ -31,12 +56,12 @@ class WebTorrentView extends Croquet.View {
                 // https://github.com/webtorrent/webtorrent/blob/master/docs/api.md#torrentdestroycallback
                 _torrent.destroy(() => {
                     // https://github.com/webtorrent/webtorrent/blob/master/docs/api.md#clientseedinput-opts-function-onseed-torrent-
-                    this._client.seed(...arguments);
+                    this._client.seed(files, options, callback);
                 });
             }
             else {
                 // https://github.com/webtorrent/webtorrent/blob/master/docs/api.md#clientseedinput-opts-function-onseed-torrent-
-                this._client.seed(...arguments);
+                this._client.seed(files, options, callback);
             }
         });
     }
@@ -55,7 +80,7 @@ class WebTorrentView extends Croquet.View {
         }
         else {
             // https://github.com/webtorrent/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
-            this._client.add(...arguments);
+            this._client.add(torrentId, options, callback);
         }
     }
 

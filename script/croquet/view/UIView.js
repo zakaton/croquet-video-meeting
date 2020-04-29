@@ -3,6 +3,8 @@ class UIView extends Croquet.View {
         super(model);
         this.model = model;
 
+        this.grid = document.querySelector('#grid');
+
         this.videos = {};
 
         this.subscribe('simple-peer', 'onstream', this.onStream);
@@ -11,6 +13,14 @@ class UIView extends Croquet.View {
         for(const viewId in this.model.users) this.onViewJoin(viewId);
         this.subscribe(this.sessionId, 'view-join', this.onViewJoin);
         this.subscribe(this.sessionId, 'view-exit', this.onViewExit);
+
+        this.reconnectButton = document.querySelector(`button#reconnect`);
+        this.publish('eventListener', 'add', {
+            type : 'click',
+            element : this.reconnectButton,
+            listener : this.join,
+            thisArg : this,
+        });
 
         this.join();
     }
@@ -28,6 +38,8 @@ class UIView extends Croquet.View {
     }
 
     onStream({viewId, stream}) {
+        if(this.viewId == viewId) return;
+
         const video = document.createElement('video');
         video.width = 200;
         video.srcObject = stream;
@@ -35,11 +47,12 @@ class UIView extends Croquet.View {
         video.autoplay = true;
         //video.muted = true;
         video.playsinline = true;
+        //video.play();
         video.addEventListener('click', e => video.play(), {once:true});
         
         this.videos[viewId].push(video);
 
-        document.body.appendChild(video);
+        this.grid.appendChild(video);
 
         stream.oninactive = () => {
             video.remove();
@@ -53,13 +66,16 @@ class UIView extends Croquet.View {
         this.remove({viewId});
     }
     remove({viewId}) {
-        this.videos[viewId].forEach(video => video.remove());
+        if(this.videos[viewId])
+            this.videos[viewId].forEach(video => video.remove());
     }
 
     detach() {
         for(const viewId in this.model.users) {
             this.remove({viewId});
         }
+
+        this.grid.innerHTML = '';
         super.detach();
     }
 }

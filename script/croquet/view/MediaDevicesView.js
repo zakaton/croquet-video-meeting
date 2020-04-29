@@ -40,8 +40,8 @@ class MediaDevicesView extends Croquet.View {
 
         // https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamConstraints
         this.mediaStreamConstraints = {
-            video : true,
-            audio : true,
+            video : false,
+            audio : false,
         };
 
         this.subscribe('media-devices', 'onstream', this.onStream);
@@ -81,7 +81,7 @@ class MediaDevicesView extends Croquet.View {
     }
 
     getUserMediaAccess() {
-        return navigator.mediaDevices.getUserMedia(this.mediaStreamConstraints)
+        return navigator.mediaDevices.getUserMedia({video:true, audio:true})
             .then(stream => {
                 stream.getTracks().forEach(track => track.stop());
             });
@@ -112,8 +112,11 @@ class MediaDevicesView extends Croquet.View {
 
 
     get isAudioEnabled() {
-        if(this.stream)
-            return this.stream.getAudioTracks()[0].enabled;
+        if(this.stream) {
+            const audioTrack = this.stream.getAudioTracks()[0];
+            if(audioTrack)
+                return audioTrack.enabled;
+        }
     }
     onToggleAudioButtonClick(event) {
         if(this.stream)
@@ -121,8 +124,11 @@ class MediaDevicesView extends Croquet.View {
     }
 
     get isVideoEnabled() {
-        if(this.stream)
-            return this.stream.getVideoTracks()[0].enabled;
+        if(this.stream) {
+            const videoTrack = this.stream.getVideoTracks()[0];
+            if(videoTrack)
+                return videoTrack.enabled;
+        }
     }
     onToggleVideoButtonClick(event) {
         if(this.stream)
@@ -135,7 +141,7 @@ class MediaDevicesView extends Croquet.View {
                 const audioTrack = this.stream.getAudioTracks()[0];
                 if(audioTrack)
                     audioTrack.enabled = options.audio;
-            }            
+            }
 
             if('video' in options) {
                 const videoTrack = this.stream.getVideoTracks()[0];
@@ -160,6 +166,7 @@ class MediaDevicesView extends Croquet.View {
 
     stop() {
         if(this.stream) {
+            console.log('stop', this.stream);
             this.stream.getTracks().forEach(track => track.stop());
             this.publish('media-devices', 'onstop', this.stream);
             delete this.stream;
@@ -167,13 +174,14 @@ class MediaDevicesView extends Croquet.View {
     }
 
     getUserMedia() {
+        this.stop();
+
         navigator.mediaDevices.getUserMedia(this.mediaStreamConstraints)
             .then(stream => {
-                if(this.stream)
-                    this.stop();
+                console.log(stream);
 
-                stream.onaddtrack = event => this.publish('media-devices', 'onaddtrack', event);
-                stream.onremovetrack = event => this.publish('media-devices', 'onremovetrack', event);
+                //stream.onaddtrack = event => this.publish('media-devices', 'onaddtrack', event);
+                //stream.onremovetrack = event => this.publish('media-devices', 'onremovetrack', event);
 
                 this.stream = stream;
                 this.publish('media-devices', 'onstream', this.stream);

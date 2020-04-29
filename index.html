@@ -3,8 +3,8 @@
         <title>Croquet Video Chat</title>
 
         <!-- https://docs.mapbox.com/mapbox-gl-js/ -->
-        <script src='https://api.mapbox.com/mapbox-gl-js/v1.9.0/mapbox-gl.js'></script>
-        <link href='https://api.mapbox.com/mapbox-gl-js/v1.9.0/mapbox-gl.css' rel='stylesheet' />
+        <!-- <script src='https://api.mapbox.com/mapbox-gl-js/v1.9.0/mapbox-gl.js'></script> -->
+        <!-- <link href='https://api.mapbox.com/mapbox-gl-js/v1.9.0/mapbox-gl.css' rel='stylesheet' /> -->
 
         <!-- https://github.com/webtorrent/webtorrent/blob/master/docs/api.md -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/webtorrent/0.107.17/webtorrent.min.js"></script>
@@ -22,6 +22,15 @@
         <script src="script/croquet/Session.js" type="module" defer></script>
     </head>
 
+    <style>
+        #grid {
+            display: grid;
+            width: 100%;
+
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+    </style>
+
     <body>
         <h1>Croquet Video Chat</h1>
 
@@ -33,9 +42,13 @@
         
         <button id='screenShare' disabled>Share Screen</button>
 
-        <button id='toggleAudio'>Mute</button>
-        <button id='toggleVideo'>Hide</button>
+        <button id='toggleAudio'>mute</button>
+        <button id='toggleVideo'>hide</button>
+
+        <button id='reconnect'>reconnect</button>
 
         <hr>
+
+        <div id='grid'></div>
     </body>
 </html>

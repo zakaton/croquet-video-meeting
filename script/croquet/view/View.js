@@ -12,13 +12,13 @@ class View extends Croquet.View {
         super(model);
         this.model = model;
 
+        this.webTorrent = new WebTorrentView(model);
         this.eventListener = new EventListenerView(model);
         this.mediaDevices = new MediaDevicesView(model);
         this.screenShare = new ScreenShareView(model);
         this.throttle = new ThrottleView(model);
         this.spatialAudio = new SpatialAudioView(model);
         this.simplePeer = new SimplePeerView(model);
-        this.webTorrent = new WebTorrentView(model);
         this.ui = new UIView(model);
     }
 
